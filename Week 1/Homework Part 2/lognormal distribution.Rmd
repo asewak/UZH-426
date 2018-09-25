@@ -1,0 +1,90 @@
+---
+title: "Log-normal distribution"
+author: "Ainesh Sewak"
+output: html_document
+---
+
+```{r knitr_options, include=FALSE}
+library(knitr)
+opts_chunk$set(fig.width=12, fig.height=4, fig.path='RmdFigs/',
+               warning=FALSE, message=FALSE)
+if(!require("ggplot2")) install.packages("ggplot2", repos="http://cran.us.r-project.org")
+```
+
+### Preliminaries
+
+Let's start by setting a seed so the charts are reproducible.
+
+```{r set_seed}
+set.seed(353)
+```
+
+Also we will be using `ggplot2` for any plotting. As such you need to first install the package (if you haven't already done so). Type (within R) `install.packages("ggplot2")`
+
+You then load the R/ggplot2 package using the `require` function:
+
+```{r load_ggplot2}
+require(ggplot2)
+```
+
+### Log-normal distribution background
+
+If a random variable $X$ is log-normally distributed then $\ln(X)$ has a normal distribution. ie.
+
+If $X \sim \text{Lognormal}(\mu, \sigma)$ then $\ln(X) \sim  \mathcal{N}(\mu, \sigma)$  
+
+<br>
+ 
+The log-normal distribution has density given by
+
+$f(x) = \frac{1}{\sqrt{2\pi}\sigma x} \text{exp}(\frac{-(\log(x) - \mu)^2}{2 \sigma^2})$
+
+where $\mu$ and $\sigma$ are the mean and standard deviation of the logarithm.
+
+<br>
+
+The arithmetic mean and the arithmetic variance of a log-normally distributed variable $X$ is given by
+
+${E(X) = \text{exp}(\mu + \frac{1}{2} \sigma^2)}{}$, 
+
+${Var(X) = \text{exp}(2\mu + \sigma^2)(\text{exp}(\sigma^2) - 1)}$
+
+### Create a random sample
+
+Next we can use the `rlnorm()` function to generate samples from a log-normal distribution $X \sim \text{Lognormal}(\mu = 1, \sigma = 0.25)$
+
+```{r generate_lnX}
+mu <- 1
+sigma <- 0.25
+x <- rlnorm(n = 100, meanlog = mu, sdlog = sigma)
+```
+
+The sample mean $\bar{X}$ is `r mean(x)` and the sample variance $\ s^2$ is `r var(x)`.
+
+The theoretical mean of the distribution $X$ is `r exp(1 + 0.5*sigma^2)` and the variance is `r exp(2*mu + sigma^2) * (exp(sigma^2) - 1)`.
+
+Note: As $lim_{n\to\infty}$, $\bar{X} \to \mu$ and $\ s^2 \to \sigma^2$.
+
+
+### Histogram on a linear scale
+
+We can use the `ggplot` function to generate a histogram for $X$.
+
+```{r generate_hist, fig.height=8}
+ggplot(data = data.frame(x), aes(x)) + 
+  geom_histogram(binwidth = 0.25, fill = I("grey"), col = I("black")) +
+  scale_y_continuous(breaks = seq(0,15,2)) + 
+  labs(title = "Histogram of sample from a log-normal distribution", x = "X", y = "Observation Count")
+```
+
+### Histogram on a log-scale
+
+It is also interesting to take a look at our distribution on a log scale. This is because it should essentially look like a normal distribution on this scale.
+
+```{r generate_hist_logscale, fig.height=8}
+
+ggplot(data = data.frame(x), aes(x)) + 
+  geom_histogram(binwidth = 0.1, fill = I("grey"), col = I("black")) +
+  scale_x_continuous(trans='log') + 
+  labs(title = "Histogram of sample from a log-normal distribution (log scale)", x = "X (log scale)", y = "Observation Count")
+```
